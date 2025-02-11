@@ -6,3 +6,5 @@ Tricks and coding in Large Language Models. The main topic covered in the blogsp
 Please have a look on the necessary packages that needs to be installed. Soon a list of requirements will be provided. 
 
 # Running on the GPU and CUDA 11.4
+
+From text embeddings and tokens to prompt analysis and topic modelling.
