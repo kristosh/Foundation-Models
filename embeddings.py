@@ -1,5 +1,3 @@
-import os
-os.environ['HF_HOME'] = "/local/athanasiadisc/cache"
 import pdb
 
 from transformers import AutoModel, AutoTokenizer

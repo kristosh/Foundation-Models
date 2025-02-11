@@ -1,6 +1,3 @@
-import os
-os.environ['HF_HOME'] = "/local/athanasiadisc/cache"
-
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 model = AutoModelForCausalLM.from_pretrained(

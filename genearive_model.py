@@ -1,7 +1,4 @@
 import torch
-
-import os
-os.environ['HF_HOME'] = "/local/athanasiadisc/cache"
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 
 import pdb

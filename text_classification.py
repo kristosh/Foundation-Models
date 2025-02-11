@@ -1,5 +1,3 @@
-os.environ['HF_HOME'] = "/local/athanasiadisc/cache"
-
 from datasets import load_dataset
 from sklearn.linear_model import LogisticRegression
 from transformers import pipeline

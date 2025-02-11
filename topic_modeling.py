@@ -1,7 +1,3 @@
-import os
-os.environ['HF_HOME'] = "/local/athanasiadisc/cache"
-import pdb
-
 # Load data from Hugging Face
 from datasets import load_dataset
 dataset = load_dataset("maartengr/arxiv_nlp")["train"]
