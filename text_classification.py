@@ -1,4 +1,3 @@
-import os
 os.environ['HF_HOME'] = "/local/athanasiadisc/cache"
 
 from datasets import load_dataset
@@ -141,8 +140,6 @@ def chatGPT():
     doc = "digusting material no reason to watch"
     print ( chatgpt_generation(prompt, doc))
 
-    import pdb
-    pdb.set_trace()
     # You can skip this if you want to save your (free) credits
     predictions = [
         chatgpt_generation(prompt, doc) for doc in tqdm(data["test"]["text"])
