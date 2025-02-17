@@ -1,23 +1,24 @@
 import os
 os.environ['HF_HOME'] = "/local/athanasiadisc/cache"
 from timeit import default_timer as timer
-
-# Clip is a multimodal LLMs that leverages the embeddings from different modalities like text and images and Transformer architecure to coccurentrly project them into a 
-# common subspace
-
-# In this example we will see how clips works for simple images
-
+from sentence_transformers import SentenceTransformer, util
 from urllib.request import urlopen
 from PIL import Image
 
+from transformers import CLIPTokenizerFast, CLIPProcessor, CLIPModel
+
+import torch
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Clip is a multimodal LLMs that leverages the embeddings from different modalities like text and images and Transformer architecure to coccurentrly project them into a 
+# common subspace
+# In this example we will see how clips works for simple images
 # Load an AI-generated image of a puppy playing in the snow
 puppy_path = "https://raw.githubusercontent.com/HandsOnLLM/Hands-On-Large-Language-Models/main/chapter09/images/puppy.png"
 image = Image.open(urlopen(puppy_path)).convert("RGB")
 
 caption = "a puppy playing in the snow"
-
-from transformers import CLIPTokenizerFast, CLIPProcessor, CLIPModel
-
 model_id = "openai/clip-vit-base-patch32"
 
 # Load a tokenizer to preprocess the text
@@ -45,12 +46,6 @@ processed_image = clip_processor(
     text=None, images=image, return_tensors="pt"
 )["pixel_values"]
 
-processed_image.shape
-
-import torch
-import numpy as np
-import matplotlib.pyplot as plt
-
 # Prepare image for visualization
 img = processed_image.squeeze(0)
 img = img.permute(*torch.arange(img.ndim - 1, -1, -1))
@@ -59,6 +54,8 @@ img = np.einsum("ijk->jik", img)
 # Visualize preprocessed image
 plt.imshow(img)
 plt.axis("off")
+plt.savefig('../../_files/image.png')
+
 
 # Create the image embedding
 image_embedding = model.get_image_features(processed_image)
@@ -72,14 +69,12 @@ image_embedding /= image_embedding.norm(dim=-1, keepdim=True)
 text_embedding = text_embedding.detach().cpu().numpy()
 image_embedding = image_embedding.detach().cpu().numpy()
 score = np.dot(text_embedding, image_embedding.T)
-score
-
-
-from sentence_transformers import SentenceTransformer, util
 
 # Load SBERT-compatible CLIP model
 model = SentenceTransformer("clip-ViT-B-32")
 
+images = image
+captions = caption
 # Encode the images
 image_embeddings = model.encode(images)
 
@@ -90,3 +85,6 @@ text_embeddings = model.encode(captions)
 sim_matrix = util.cos_sim(
     image_embeddings, text_embeddings
 )
+
+import pdb
+pdb.set_trace() 
