@@ -15,10 +15,10 @@ import matplotlib.pyplot as plt
 # common subspace
 # In this example we will see how clips works for simple images
 # Load an AI-generated image of a puppy playing in the snow
-puppy_path = "https://raw.githubusercontent.com/HandsOnLLM/Hands-On-Large-Language-Models/main/chapter09/images/puppy.png"
-image = Image.open(urlopen(puppy_path)).convert("RGB")
+puppy_path = "../../_files/solomon.jpg"
+image = Image.open((puppy_path)).convert("RGB")
 
-caption = "a puppy playing in the snow"
+caption = "satelites in a garden"
 model_id = "openai/clip-vit-base-patch32"
 
 # Load a tokenizer to preprocess the text
@@ -51,10 +51,10 @@ img = processed_image.squeeze(0)
 img = img.permute(*torch.arange(img.ndim - 1, -1, -1))
 img = np.einsum("ijk->jik", img)
 
-# Visualize preprocessed image
-plt.imshow(img)
-plt.axis("off")
-plt.savefig('../../_files/image.png')
+# # Visualize preprocessed image
+# plt.imshow(img)
+# plt.axis("off")
+# plt.savefig('../../_files/image.png')
 
 
 # Create the image embedding
@@ -86,5 +86,68 @@ sim_matrix = util.cos_sim(
     image_embeddings, text_embeddings
 )
 
-import pdb
-pdb.set_trace() 
+
+# code on blip-2
+
+from transformers import AutoProcessor, Blip2ForConditionalGeneration
+import torch
+
+# Load processor and main model
+blip_processor = AutoProcessor.from_pretrained("Salesforce/blip2-opt-2.7b")
+model = Blip2ForConditionalGeneration.from_pretrained(
+    "Salesforce/blip2-opt-2.7b",
+    torch_dtype=torch.float16
+)
+
+# Send the model to GPU to speed up inference
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model.to(device)
+
+# Load image of a supercar
+car_path = "https://raw.githubusercontent.com/HandsOnLLM/Hands-On-Large-Language-Models/main/chapter09/images/car.png"
+image = Image.open(urlopen(car_path)).convert("RGB")
+
+# Preprocess the image
+inputs = blip_processor(image, return_tensors="pt").to(device, torch.float16)
+inputs["pixel_values"].shape
+
+# Preprocess the text
+text = "Her vocalization was remarkably melodic"
+token_ids = blip_processor(image, text=text, return_tensors="pt")
+token_ids = token_ids.to(device, torch.float16)["input_ids"][0]
+
+# Convert input ids back to tokens
+tokens = blip_processor.tokenizer.convert_ids_to_tokens(token_ids)
+tokens
+
+# Replace the space token with an underscore
+tokens = [token.replace("Ġ", "_") for token in tokens]
+
+# Load an AI-generated image of a supercar
+image = Image.open(urlopen(car_path)).convert("RGB")
+
+
+# Convert an image into inputs and preprocess it
+inputs = blip_processor(image, return_tensors="pt").to(device, torch.float16)
+
+# Generate image ids to be passed to the decoder (LLM)
+generated_ids = model.generate(**inputs, max_new_tokens=20)
+
+# Generate text from the image ids
+generated_text = blip_processor.batch_decode(
+    generated_ids, skip_special_tokens=True
+)
+generated_text = generated_text[0].strip()
+
+# Load Rorschach image
+url = "https://upload.wikimedia.org/wikipedia/commons/7/70/Rorschach_blot_01.jpg"
+image = Image.open(urlopen(url)).convert("RGB")
+
+# Generate caption
+inputs = blip_processor(image, return_tensors="pt").to(device, torch.float16)
+generated_ids = model.generate(**inputs, max_new_tokens=20)
+generated_text = blip_processor.batch_decode(
+    generated_ids, skip_special_tokens=True
+)
+generated_text = generated_text[0].strip()
+generated_text
