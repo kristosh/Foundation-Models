@@ -58,12 +58,6 @@ def clip_model(image):
     img = img.permute(*torch.arange(img.ndim - 1, -1, -1))
     img = np.einsum("ijk->jik", img)
 
-    # # Visualize preprocessed image
-    # plt.imshow(img)
-    # plt.axis("off")
-    # plt.savefig('../../_files/image.png')
-
-
     # Create the image embedding
     image_embedding = model.get_image_features(processed_image)
     image_embedding.shape
@@ -125,10 +119,6 @@ def blip_model(image):
     # Replace the space token with an underscore
     tokens = [token.replace("Ġ", "_") for token in tokens]
 
-    # Load an AI-generated image of a supercar
-    image = Image.open(urlopen(car_path)).convert("RGB")
-
-
     # Convert an image into inputs and preprocess it
     inputs = blip_processor(image, return_tensors="pt").to(device, torch.float16)
 
@@ -143,7 +133,7 @@ def blip_model(image):
 
     # Generate caption
     inputs = blip_processor(image, return_tensors="pt").to(device, torch.float16)
-    generated_ids = model.generate(**inputs, max_new_tokens=20)
+    generated_ids = model.generate(**inputs, max_new_tokens=40)
     generated_text = blip_processor.batch_decode(
         generated_ids, skip_special_tokens=True
     )
