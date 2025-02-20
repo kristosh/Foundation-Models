@@ -1,7 +1,7 @@
 import os
 os.environ['HF_HOME'] = "/local/athanasiadisc/cache"
 
-from datasets import load_dataset
+from datasets import Dataset, load_dataset
 # Load MNLI dataset from GLUE
 # 0 = entailment, 1 = neutral, 2 = contradiction
 train_dataset = load_dataset(
@@ -16,6 +16,13 @@ from sentence_transformers import SentenceTransformer
 embedding_model = SentenceTransformer('bert-base-uncased')
 
 from sentence_transformers import losses
+from sentence_transformers.training_args import SentenceTransformerTrainingArguments
+from sentence_transformers.trainer import SentenceTransformerTrainer
+from sentence_transformers.evaluation import EmbeddingSimilarityEvaluator
+
+from mteb import MTEB
+import pdb
+
 # Define the loss function. In softmax loss, we will also need to explicitly set the number of labels.
 train_loss = losses.SoftmaxLoss(
     model=embedding_model,
@@ -23,7 +30,6 @@ train_loss = losses.SoftmaxLoss(
     num_labels=3
 )
 
-from sentence_transformers.evaluation import EmbeddingSimilarityEvaluator
 # Create an embedding similarity evaluator for STSB
 val_sts = load_dataset("glue", "stsb", split="validation")
 
@@ -34,8 +40,6 @@ evaluator = EmbeddingSimilarityEvaluator(
     main_similarity="cosine",
 )
 
-
-from sentence_transformers.training_args import SentenceTransformerTrainingArguments
 # Define the training arguments
 args = SentenceTransformerTrainingArguments(
     output_dir="base_embedding_model",
@@ -49,7 +53,6 @@ args = SentenceTransformerTrainingArguments(
 )
 
 
-from sentence_transformers.trainer import SentenceTransformerTrainer
 # Train embedding model
 trainer = SentenceTransformerTrainer(
     model=embedding_model,
@@ -60,22 +63,12 @@ trainer = SentenceTransformerTrainer(
 )
 trainer.train()
 
-from mteb import MTEB
 # Choose evaluation task
 evaluation = MTEB(tasks=["Banking77Classification"])
 # Calculate results
 results = evaluation.run(model)
 
-from mteb import MTEB
-# Choose evaluation task
-evaluation = MTEB(tasks=["Banking77Classification"])
-# Calculate results
-results = evaluation.run(model)
-
-import pdb
 pdb.set_trace()
-
-from datasets import Dataset, load_dataset
 # Load MNLI dataset from GLUE
 # 0 = entailment, 1 = neutral, 2 = contradiction
 train_dataset = load_dataset(
@@ -90,7 +83,6 @@ train_dataset = Dataset.from_dict({
     train_dataset["label"]]
 })
 
-from sentence_transformers.evaluation import EmbeddingSimilarityEvaluator
 # Create an embedding similarity evaluator for stsb
 val_sts = load_dataset("glue", "stsb", split="validation")
 evaluator = EmbeddingSimilarityEvaluator(
@@ -100,10 +92,6 @@ evaluator = EmbeddingSimilarityEvaluator(
     main_similarity="cosine"
 )
 
-
-from sentence_transformers import losses, SentenceTransformer
-from sentence_transformers.trainer import SentenceTransformerTrainer
-from sentence_transformers.training_args import SentenceTransformerTrainingArguments
 # Define model
 embedding_model = SentenceTransformer("bert-base-uncased")
 # Loss function
@@ -132,3 +120,5 @@ trainer.train()
 
 # Evaluate our trained model
 evaluator(embedding_model)
+
+pdb.set_trace()
